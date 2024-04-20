@@ -7,7 +7,7 @@ import Notification from "../Notification/Notification";
 
 export default function App () {
   const [feedbackTypes, setFeedbackTypes] = useState(() => {
-    const savedFeedback = localStorage.getItem("feedbackCount")
+    const savedFeedback = localStorage.getItem("feedbackTypes")
     if (savedFeedback !== null) {
       return JSON.parse(savedFeedback)
     }
