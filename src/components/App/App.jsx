@@ -1,23 +1,42 @@
-import userData from "../../userData.json"
-import friends from "../../friends.json"
-import transactions from "../../ transactions.json"
-import Profile from "../Profile/Profile";
-import FriendList from "../Friendlist/FriendList"
-import TransactionHistory from "../TransactionHistory/TransactionHistory";
 
-const App = () => {
+import { useState, useEffect } from "react";
+import Description from "../Description/Description"
+import Options from "../Options/Options";
+import Feedback from "../Feedback/Feedback";
+import Notification from "../Notification/Notification";
+
+export default function App () {
+  const [feedbackTypes, setFeedbackTypes] = useState(() => {
+    const savedFeedback = localStorage.getItem("feedbackCount")
+    if (savedFeedback !== null) {
+      return JSON.parse(savedFeedback)
+    }
+    return {
+  good: 0,
+	neutral: 0,
+	bad: 0
+    }
+  });
+
+  const updateFeedback = (feedbackType) => {
+    setFeedbackTypes(prevFeedback => ({ ...prevFeedback, [feedbackType]: prevFeedback[feedbackType] + 1 }));
+  };
+  const resetFeedback = () => {
+    setFeedbackTypes({ good: 0, neutral: 0, bad: 0 });
+  }
+  useEffect(() => {
+    localStorage.setItem('feedbackTypes', JSON.stringify(feedbackTypes))
+  }, [feedbackTypes]);
+
+  const totalFeedback = feedbackTypes.good + feedbackTypes.neutral + feedbackTypes.bad;
+  const positiveFeedback = totalFeedback > 0 ? Math.round((feedbackTypes.good / totalFeedback) * 100) : 0;
   return (
     <>
-      <Profile
-        name={userData.username}
-        tag={userData.tag}
-        location={userData.location}
-        image={userData.avatar}
-        stats={userData.stats}
-      />
-      <FriendList friends={friends} />
-      <TransactionHistory items={transactions}/>
+      <Description />
+      <Options updateFeedback={updateFeedback} totalFeedback={totalFeedback} resetFeedback={resetFeedback} />
+      {totalFeedback ==0 && (<Notification />)}
+      {totalFeedback > 0 ? (
+        <Feedback positiveFeedback={positiveFeedback} feedbackTypes={feedbackTypes} totalFeedback={totalFeedback} />) : null}
     </>
-  );
-};
-export default App;
+  )
+}
